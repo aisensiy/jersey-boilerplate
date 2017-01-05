@@ -4,10 +4,12 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.flywaydb:flyway-gradle-plugin:3.0"
         classpath 'mysql:mysql-connector-java:5.1.34'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
 }
 
@@ -23,7 +25,7 @@ flyway {
     driver = 'com.mysql.jdbc.Driver'
     user = 'mysql'
     password = 'mysql'
-    url = 'jdbc:mysql://localhost:3306/fixed_assets'
+    url = 'jdbc:mysql://localhost:3307/fixed_assets'
 }
 
 
@@ -50,4 +52,24 @@ dependencies {
     testCompile 'org.mockito:mockito-all:1.8.4'
     testCompile "org.glassfish.jersey.test-framework:jersey-test-framework-core:$jerseyVersion"
     testCompile "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:$jerseyVersion"
+}
+
+task standaloneJar(type: Jar, dependsOn: jar) {
+    baseName = "app"
+    classifier = "standalone"
+    version = ""
+
+    from files(sourceSets.main.output.classesDir)
+    from files(sourceSets.main.output.resourcesDir)
+
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
+    exclude("META-INF/*.RSA")
+    exclude("META-INF/*.RSA")
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
 }
